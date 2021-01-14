@@ -56,6 +56,14 @@ type instr =
   | Jtype of (jinstr * int * int) (* opcode, rd, imm *)
   | Illegal of int (* opcode *)
 
+let sign_extend size n =
+  let sign = 1 lsl size in
+  if (n land sign) <> 0 then
+    let extension = lnot (sign - 1) in
+    n lor extension
+  else
+    n
+
 let decode_op r = r land 0x7f
 let decode_rd r = (r land 0xf80) lsr 7
 let decode_rs1 r = (r land 0xf8000) lsr 15
@@ -124,6 +132,7 @@ let decode_b r =
       funct3 = decode_funct3 r and
       immediate = ((r land 0x80000000) lsr 19) lor ((r land 0x80) lsl 4)
                   lor ((r land 0x7e000000) lsr 20) lor ((r land 0xf00) lsr 7) in
+  let immediate = sign_extend 12 immediate in
   match funct3 with
   | 0b000 -> Btype (Beq, rs1, rs2, immediate)
   | 0b001 -> Btype (Bne, rs1, rs2, immediate)
