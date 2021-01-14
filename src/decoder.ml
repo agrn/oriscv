@@ -113,9 +113,9 @@ let decode_s r =
       rs2 = decode_rs2 r and
       funct3 = decode_funct3 r in
   match funct3 with
-  | 0b000 -> Stype (Sb, rs1, rs2, 0)
-  | 0b001 -> Stype (Sh, rs1, rs2, 0)
-  | 0b010 -> Stype (Sw, rs1, rs2, 0)
+  | 0b000 -> Stype (Sb, rs2, rs1, 0)
+  | 0b001 -> Stype (Sh, rs2, rs1, 0)
+  | 0b010 -> Stype (Sw, rs2, rs1, 0)
   | _ -> Illegal r
 
 let decode_b r =
