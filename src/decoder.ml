@@ -79,16 +79,16 @@ let decode_r r =
       funct3 = decode_funct3 r and
       funct7 = decode_funct7 r in
   match op, funct3, funct7 with
-  | 0b0110011, 0, 0b000 -> Rtype (Add, rd, rs1, rs2)
-  | 0b0110011, 0, 0b001 -> Rtype (Sll, rd, rs1, rs2)
-  | 0b0110011, 0, 0b010 -> Rtype (Slt, rd, rs1, rs2)
-  | 0b0110011, 0, 0b011 -> Rtype (Sltu, rd, rs1, rs2)
-  | 0b0110011, 0, 0b100 -> Rtype (Xor, rd, rs1, rs2)
-  | 0b0110011, 0, 0b101 -> Rtype (Srl, rd, rs1, rs2)
-  | 0b0110011, 0, 0b110 -> Rtype (Or, rd, rs1, rs2)
-  | 0b0110011, 0, 0b111 -> Rtype (And, rd, rs1, rs2)
-  | 0b0110011, 0b0100000, 0b000 -> Rtype (Sub, rd, rs1, rs2)
-  | 0b0110011, 0b0100000, 0b101 -> Rtype (Sra, rd, rs1, rs2)
+  | 0b0110011, 0b000, 0 -> Rtype (Add, rd, rs1, rs2)
+  | 0b0110011, 0b001, 0 -> Rtype (Sll, rd, rs1, rs2)
+  | 0b0110011, 0b010, 0 -> Rtype (Slt, rd, rs1, rs2)
+  | 0b0110011, 0b011, 0 -> Rtype (Sltu, rd, rs1, rs2)
+  | 0b0110011, 0b100, 0 -> Rtype (Xor, rd, rs1, rs2)
+  | 0b0110011, 0b101, 0 -> Rtype (Srl, rd, rs1, rs2)
+  | 0b0110011, 0b110, 0 -> Rtype (Or, rd, rs1, rs2)
+  | 0b0110011, 0b111, 0 -> Rtype (And, rd, rs1, rs2)
+  | 0b0110011, 0b000, 0b0100000 -> Rtype (Sub, rd, rs1, rs2)
+  | 0b0110011, 0b101, 0b0100000 -> Rtype (Sra, rd, rs1, rs2)
   | _ -> Illegal r
 
 let decode_i r =
