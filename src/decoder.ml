@@ -121,14 +121,16 @@ let decode_s r =
 let decode_b r =
   let rs1 = decode_rs1 r and
       rs2 = decode_rs2 r and
-      funct3 = decode_funct3 r in
+      funct3 = decode_funct3 r and
+      immediate = ((r land 0x80000000) lsr 19) lor ((r land 0x80) lsl 4)
+                  lor ((r land 0x7e000000) lsr 20) lor ((r land 0xf00) lsr 7) in
   match funct3 with
-  | 0b000 -> Btype (Beq, rs1, rs2, 0)
-  | 0b001 -> Btype (Bne, rs1, rs2, 0)
-  | 0b100 -> Btype (Blt, rs1, rs2, 0)
-  | 0b101 -> Btype (Bge, rs1, rs2, 0)
-  | 0b110 -> Btype (Bltu, rs1, rs2, 0)
-  | 0b111 -> Btype (Bgeu, rs1, rs2, 0)
+  | 0b000 -> Btype (Beq, rs1, rs2, immediate)
+  | 0b001 -> Btype (Bne, rs1, rs2, immediate)
+  | 0b100 -> Btype (Blt, rs1, rs2, immediate)
+  | 0b101 -> Btype (Bge, rs1, rs2, immediate)
+  | 0b110 -> Btype (Bltu, rs1, rs2, immediate)
+  | 0b111 -> Btype (Bgeu, rs1, rs2, immediate)
   | _ -> Illegal r
 
 let decode_u r =
