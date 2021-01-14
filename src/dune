@@ -1,0 +1,3 @@
+(executable
+ (name oriscv)
+ (modules Decoder Oriscv))
