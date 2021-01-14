@@ -152,5 +152,5 @@ let decode_instr r =
   | 0b0100011 -> decode_s r
   | 0b1100011 -> decode_b r
   | 0b0110111 | 0b0010111 -> decode_u r
-  | 0b1101111 -> decode_j
+  | 0b1101111 -> decode_j r
   | _ -> Illegal r
