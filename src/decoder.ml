@@ -165,3 +165,69 @@ let decode_instr r =
   | 0b0110111 | 0b0010111 -> decode_u r
   | 0b1101111 -> decode_j r
   | _ -> Illegal r
+
+let print_rtype = function
+  | Add -> "add"
+  | Sub -> "sub"
+  | Sll -> "sll"
+  | Slt -> "slt"
+  | Sltu -> "sltu"
+  | Xor -> "xor"
+  | Srl -> "srl"
+  | Sra -> "sra"
+  | Or -> "or"
+  | And -> "and"
+
+let print_itype = function
+  | Jalr -> "jalr"
+  | Lb -> "lb"
+  | Lh -> "lh"
+  | Lw -> "lw"
+  | Lbu -> "lbu"
+  | Lhu -> "lhu"
+  | Addi -> "addi"
+  | Slti -> "slti"
+  | Sltiu -> "sltiu"
+  | Xori -> "xori"
+  | Ori -> "ori"
+  | Andi -> "andi"
+  | Slli -> "slli"
+  | Srli -> "srli"
+  | Srai -> "srai"
+
+let print_stype = function
+  | Sb -> "sb"
+  | Sh -> "sh"
+  | Sw -> "sw"
+
+let print_btype = function
+  | Beq -> "beq"
+  | Bne -> "bne"
+  | Blt -> "blt"
+  | Bge -> "bge"
+  | Bltu -> "bltu"
+  | Bgeu -> "bgeu"
+
+let print_utype = function
+  | Lui -> "lui"
+  | Auipc -> "auipc"
+
+let print_jtype = function
+  | Jal -> "jal"
+
+let print_instr = function
+  | Rtype (opcode, rd, rs1, rs2) ->
+    Printf.sprintf "%s x%d, x%d, x%d" (print_rtype opcode) rd rs1 rs2
+  | Itype (Lb | Lh | Lw | Lbu | Lhu as opcode, rd, rs1, imm) ->
+    Printf.sprintf "%s x%d, %d(x%d)" (print_itype opcode) rd rs1 imm
+  | Itype (opcode, rd, rs1, imm) ->
+    Printf.sprintf "%s x%d, x%d, %d" (print_itype opcode) rd rs1 imm
+  | Stype (opcode, rs1, rs2, imm) ->
+    Printf.sprintf "%s x%d, %d(x%d)" (print_stype opcode) rs1 imm rs2
+  | Btype (opcode, rs1, rs2, imm) ->
+    Printf.sprintf "%s x%d, x%d, %d" (print_btype opcode) rs1 rs2 imm
+  | Utype (opcode, rd, imm) ->
+    Printf.sprintf "%s x%d, %d" (print_utype opcode) rd imm
+  | Jtype (opcode, rd, imm) ->
+    Printf.sprintf "%s x%d, %d" (print_jtype opcode) rd imm
+  | Illegal instr -> Printf.sprintf "illegal instruction (%d)" instr

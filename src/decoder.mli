@@ -57,3 +57,4 @@ type instr =
   | Illegal of int (* opcode *)
 
 val decode_instr : int -> instr
+val print_instr : instr -> string
