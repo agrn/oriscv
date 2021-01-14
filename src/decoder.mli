@@ -5,7 +5,6 @@ type rinstr =
   | Slt
   | Sltu
   | Xor
-  | Xor
   | Srl
   | Sra
   | Or
@@ -21,6 +20,7 @@ type iinstr =
   | Addi
   | Slti
   | Sltiu
+  | Xori
   | Ori
   | Andi
   | Slli

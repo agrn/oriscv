@@ -5,7 +5,6 @@ type rinstr =
   | Slt
   | Sltu
   | Xor
-  | Xor
   | Srl
   | Sra
   | Or
@@ -21,6 +20,7 @@ type iinstr =
   | Addi
   | Slti
   | Sltiu
+  | Xori
   | Ori
   | Andi
   | Slli
@@ -76,7 +76,7 @@ let decode_r r =
   | 0b0110011, 0, 0b010 -> Rtype (Slt, rd, rs1, rs2)
   | 0b0110011, 0, 0b011 -> Rtype (Sltu, rd, rs1, rs2)
   | 0b0110011, 0, 0b100 -> Rtype (Xor, rd, rs1, rs2)
-  | 0b0110011, 0, 0b101 -> Rtype (Slr, rd, rs1, rs2)
+  | 0b0110011, 0, 0b101 -> Rtype (Srl, rd, rs1, rs2)
   | 0b0110011, 0, 0b110 -> Rtype (Or, rd, rs1, rs2)
   | 0b0110011, 0, 0b111 -> Rtype (And, rd, rs1, rs2)
   | 0b0110011, 0b0100000, 0b000 -> Rtype (Sub, rd, rs1, rs2)
@@ -142,7 +142,7 @@ let decode_u r =
 let decode_j r =
   let op = decode_op r and
       rd = decode_rd r in
-  if op = 0b1101111 then Rtype (Jal, rd, 0)
+  if op = 0b1101111 then Jtype (Jal, rd, 0)
   else Illegal r
 
 let decode_instr r =
