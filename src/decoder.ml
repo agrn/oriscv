@@ -56,12 +56,12 @@ type instr =
   | Jtype of (jinstr * int * int) (* opcode, rd, imm *)
   | Illegal of int (* opcode *)
 
-let decode_op r = r & 0x7f
-let decode_rd r = (r & 0x7c0) lsr 7
-let decode_rs1 r = (r & 0xf8000) lsr 15 
-let decode_rs2 r = (r & 0x1f00000) lsr 20
-let decode_funct3 r = (r & 0x700) lsr 12
-let decode_funct7 r = (r & 0xfe000000) lsr 25
+let decode_op r = r land 0x7f
+let decode_rd r = (r land 0xf80) lsr 7
+let decode_rs1 r = (r land 0xf8000) lsr 15
+let decode_rs2 r = (r land 0x1f00000) lsr 20
+let decode_funct3 r = (r land 0x7000) lsr 12
+let decode_funct7 r = (r land 0xfe000000) lsr 25
 
 let decode_r r =
   let op = decode_op r and
