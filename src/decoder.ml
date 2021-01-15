@@ -224,19 +224,61 @@ let print_utype = function
 let print_jtype = function
   | Jal -> "jal"
 
+let register_to_abi = function
+  | 0 -> "zero"
+  | 1 -> "ra"
+  | 2 -> "sp"
+  | 3 -> "gp"
+  | 4 -> "tp"
+  | 5 -> "t0"
+  | 6 -> "t1"
+  | 7 -> "t7"
+  | 8 -> "fp"
+  | 9 -> "s1"
+  | 10 -> "a0"
+  | 11 -> "a1"
+  | 12 -> "a2"
+  | 13 -> "a3"
+  | 14 -> "a4"
+  | 15 -> "a5"
+  | 16 -> "a6"
+  | 17 -> "a7"
+  | 18 -> "s2"
+  | 19 -> "s3"
+  | 20 -> "s4"
+  | 21 -> "s5"
+  | 22 -> "s6"
+  | 23 -> "s7"
+  | 24 -> "s8"
+  | 25 -> "s9"
+  | 26 -> "s10"
+  | 27 -> "s11"
+  | 28 -> "t3"
+  | 29 -> "t4"
+  | 30 -> "t5"
+  | 31 -> "t6"
+  | _ -> failwith "Invalid register number."
+
+let fmt_register () = register_to_abi
+
 let print_instr = function
   | Rtype (opcode, rd, rs1, rs2) ->
-    Printf.sprintf "%s x%d, x%d, x%d" (print_rtype opcode) rd rs1 rs2
+    Printf.sprintf "%s %a, %a, %a"
+      (print_rtype opcode) fmt_register rd fmt_register rs1 fmt_register rs2
   | Itype (Lb | Lh | Lw | Lbu | Lhu as opcode, rd, rs1, imm) ->
-    Printf.sprintf "%s x%d, %d(x%d)" (print_itype opcode) rd imm rs1
+    Printf.sprintf "%s %a, %d(%a)"
+      (print_itype opcode) fmt_register rd imm fmt_register rs1
   | Itype (opcode, rd, rs1, imm) ->
-    Printf.sprintf "%s x%d, x%d, %d" (print_itype opcode) rd rs1 imm
+    Printf.sprintf "%s %a, %a, %d"
+      (print_itype opcode) fmt_register rd fmt_register rs1 imm
   | Stype (opcode, rs1, rs2, imm) ->
-    Printf.sprintf "%s x%d, %d(x%d)" (print_stype opcode) rs1 imm rs2
+    Printf.sprintf "%s %a, %d(%a)"
+      (print_stype opcode) fmt_register rs1 imm fmt_register rs2
   | Btype (opcode, rs1, rs2, imm) ->
-    Printf.sprintf "%s x%d, x%d, %d" (print_btype opcode) rs1 rs2 imm
+    Printf.sprintf "%s %a, %a, 0x%X"
+      (print_btype opcode) fmt_register rs1 fmt_register rs2 imm
   | Utype (opcode, rd, imm) ->
-    Printf.sprintf "%s x%d, %d" (print_utype opcode) rd imm
+    Printf.sprintf "%s %a, 0x%X" (print_utype opcode) fmt_register rd imm
   | Jtype (opcode, rd, imm) ->
-    Printf.sprintf "%s x%d, %d" (print_jtype opcode) rd imm
+    Printf.sprintf "%s %a, 0x%X" (print_jtype opcode) fmt_register rd imm
   | Illegal instr -> Printf.sprintf "illegal instruction (0x%X)" instr
