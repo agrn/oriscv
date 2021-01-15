@@ -239,4 +239,4 @@ let print_instr = function
     Printf.sprintf "%s x%d, %d" (print_utype opcode) rd imm
   | Jtype (opcode, rd, imm) ->
     Printf.sprintf "%s x%d, %d" (print_jtype opcode) rd imm
-  | Illegal instr -> Printf.sprintf "illegal instruction (%d)" instr
+  | Illegal instr -> Printf.sprintf "illegal instruction (0x%X)" instr
