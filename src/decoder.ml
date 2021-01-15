@@ -135,8 +135,8 @@ let decode_b r =
       rs2 = decode_rs2 r and
       funct3 = decode_funct3 r and
       immediate = ((r land 0x80000000) lsr 19) lor ((r land 0x80) lsl 4)
-                  lor ((r land 0x7e000000) lsr 20) lor ((r land 0xf00) lsr 7) in
-  let immediate = sign_extend 12 immediate in
+                  lor ((r land 0x7e000000) lsr 20) lor ((r land 0xf00) lsr 7)
+                  |> sign_extend 12 in
   match funct3 with
   | 0b000 -> Btype (Beq, rs1, rs2, immediate)
   | 0b001 -> Btype (Bne, rs1, rs2, immediate)
