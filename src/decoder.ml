@@ -98,19 +98,20 @@ let decode_i r =
       shamt = decode_rs2 r and
       funct3 = decode_funct3 r and
       funct7 = decode_funct7 r in
+  let immediate = sign_extend 11 ((r land 0xfff00000) lsr 20) in
   match op, funct3, funct7 with
-  | 0b1100111, 0, _ -> Itype (Jalr, rd, rs1, 0)
-  | 0b0000011, 0b000, _ -> Itype (Lb, rd, rs1, 0)
-  | 0b0000011, 0b001, _ -> Itype (Lh, rd, rs1, 0)
-  | 0b0000011, 0b010, _ -> Itype (Lw, rd, rs1, 0)
-  | 0b0000011, 0b100, _ -> Itype (Lbu, rd, rs1, 0)
-  | 0b0000011, 0b101, _ -> Itype (Lhu, rd, rs1, 0)
-  | 0b0010011, 0b000, _ -> Itype (Addi, rd, rs1, 0)
-  | 0b0010011, 0b010, _ -> Itype (Slti, rd, rs1, 0)
-  | 0b0010011, 0b011, _ -> Itype (Sltiu, rd, rs1, 0)
-  | 0b0010011, 0b100, _ -> Itype (Xori, rd, rs1, 0)
-  | 0b0010011, 0b110, _ -> Itype (Ori, rd, rs1, 0)
-  | 0b0010011, 0b111, _ -> Itype (Andi, rd, rs1, 0)
+  | 0b1100111, 0, _ -> Itype (Jalr, rd, rs1, immediate)
+  | 0b0000011, 0b000, _ -> Itype (Lb, rd, rs1, immediate)
+  | 0b0000011, 0b001, _ -> Itype (Lh, rd, rs1, immediate)
+  | 0b0000011, 0b010, _ -> Itype (Lw, rd, rs1, immediate)
+  | 0b0000011, 0b100, _ -> Itype (Lbu, rd, rs1, immediate)
+  | 0b0000011, 0b101, _ -> Itype (Lhu, rd, rs1, immediate)
+  | 0b0010011, 0b000, _ -> Itype (Addi, rd, rs1, immediate)
+  | 0b0010011, 0b010, _ -> Itype (Slti, rd, rs1, immediate)
+  | 0b0010011, 0b011, _ -> Itype (Sltiu, rd, rs1, immediate)
+  | 0b0010011, 0b100, _ -> Itype (Xori, rd, rs1, immediate)
+  | 0b0010011, 0b110, _ -> Itype (Ori, rd, rs1, immediate)
+  | 0b0010011, 0b111, _ -> Itype (Andi, rd, rs1, immediate)
   | 0b0010011, 0b001, 0 -> Itype (Slli, rd, rs1, shamt)
   | 0b0010011, 0b101, 0 -> Itype (Srli, rd, rs1, shamt)
   | 0b0010011, 0b101, 0b0100000 -> Itype (Srai, rd, rs1, shamt)
