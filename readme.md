@@ -15,7 +15,7 @@ $ dune exec src/oriscv.exe <instruction file>
 `oriscv` reads hex instructions, so you have to dump them first like this:
 
 ```sh
-$ riscv32-unknown-elf-objdump -d <exe> | awk '/^[0-9a-f]+:/ {print $2} >out.dis'
+$ riscv32-unknown-elf-objdump -d <exe> | awk '/^[0-9a-f]+:/ {print $2}' >out.dis
 ```
 
 ## Warning
