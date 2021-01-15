@@ -120,11 +120,14 @@ let decode_i r =
 let decode_s r =
   let rs1 = decode_rs1 r and
       rs2 = decode_rs2 r and
-      funct3 = decode_funct3 r in
+      funct3 = decode_funct3 r and
+      lower_imm = decode_rd r and
+      higher_imm = decode_funct7 r in
+  let immediate = sign_extend 11 ((lower_imm lsr 7) lor (higher_imm lsr 20)) in
   match funct3 with
-  | 0b000 -> Stype (Sb, rs2, rs1, 0)
-  | 0b001 -> Stype (Sh, rs2, rs1, 0)
-  | 0b010 -> Stype (Sw, rs2, rs1, 0)
+  | 0b000 -> Stype (Sb, rs2, rs1, immediate)
+  | 0b001 -> Stype (Sh, rs2, rs1, immediate)
+  | 0b010 -> Stype (Sw, rs2, rs1, immediate)
   | _ -> Illegal r
 
 let decode_b r =
