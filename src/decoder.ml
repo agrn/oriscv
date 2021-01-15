@@ -219,7 +219,7 @@ let print_instr = function
   | Rtype (opcode, rd, rs1, rs2) ->
     Printf.sprintf "%s x%d, x%d, x%d" (print_rtype opcode) rd rs1 rs2
   | Itype (Lb | Lh | Lw | Lbu | Lhu as opcode, rd, rs1, imm) ->
-    Printf.sprintf "%s x%d, %d(x%d)" (print_itype opcode) rd rs1 imm
+    Printf.sprintf "%s x%d, %d(x%d)" (print_itype opcode) rd imm rs1
   | Itype (opcode, rd, rs1, imm) ->
     Printf.sprintf "%s x%d, x%d, %d" (print_itype opcode) rd rs1 imm
   | Stype (opcode, rs1, rs2, imm) ->
