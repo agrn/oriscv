@@ -3,6 +3,11 @@
 A RISC-V 32 instruction decoder/statistics generator written in OCaml.  It can
 be compiled with OCaml 4.05.0 (the version distributed in Debian).
 
+## Dependencies
+
+Only the stdlib and Dune for building.  A `Makefile` could be made to do the
+same thing as this software is so simple.
+
 ## Usage
 
 To build and run `oriscv`, use the following commands:
