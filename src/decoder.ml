@@ -158,7 +158,11 @@ let decode_u r =
 let decode_j r =
   let op = decode_op r and
       rd = decode_rd r in
-  if op = 0b1101111 then Jtype (Jal, rd, 0)
+  let immediate = (r land 0xff000) lor ((r land 0x100000) lsr 9)
+                  lor ((r land 0x7fe00000) lsr 20)
+                  lor ((r land 0x80000000) lsr 11)
+                  |> sign_extend 20 in
+  if op = 0b1101111 then Jtype (Jal, rd, immediate)
   else Illegal r
 
 let decode_instr r =
