@@ -148,10 +148,11 @@ let decode_b r =
 
 let decode_u r =
   let op = decode_op r and
-      rd = decode_rd r in
+      rd = decode_rd r and
+      immediate = (r land 0xffffff00) lsr 12 in
   match op with
-  | 0b0110111 -> Utype (Lui, rd, 0)
-  | 0b0010111 -> Utype (Auipc, rd, 0)
+  | 0b0110111 -> Utype (Lui, rd, immediate)
+  | 0b0010111 -> Utype (Auipc, rd, immediate)
   | _ -> Illegal r
 
 let decode_j r =
