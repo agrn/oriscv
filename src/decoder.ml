@@ -121,9 +121,9 @@ let decode_s r =
   let rs1 = decode_rs1 r and
       rs2 = decode_rs2 r and
       funct3 = decode_funct3 r and
-      lower_imm = decode_rd r and
-      higher_imm = decode_funct7 r in
-  let immediate = sign_extend 11 ((lower_imm lsr 7) lor (higher_imm lsr 20)) in
+      lower_imm = decode_rd r in
+  let immediate = lower_imm lor ((r land 0xfe000000) lsr 20)
+                  |> sign_extend 11 in
   match funct3 with
   | 0b000 -> Stype (Sb, rs2, rs1, immediate)
   | 0b001 -> Stype (Sh, rs2, rs1, immediate)
