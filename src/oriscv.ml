@@ -18,4 +18,4 @@ let () =
         raw_instrs in
     let raw_instrs = read_instr_stream [] in
     let instrs = List.fold_left (fun res i -> (Decoder.decode_instr i) :: res) [] raw_instrs in
-    List.iter (fun instr -> print_endline @@ Decoder.print_instr instr) instrs
+    Patterns.find_patterns instrs
