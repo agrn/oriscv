@@ -32,3 +32,12 @@ those, the program could be changed to use `Int32` instead.
 `oriscv` only supports a subset of RV32I for now (all of them except fences and
 CPSR-related instructions).  Unrecognised instructions won't crash it (they will
 show up as illegal instructions once decoded).
+
+## Current features
+
+ * Number of instructions
+ * Proportion of branches
+ * Proportions of jumps
+ * Proportions of various pseudo-instructions (`lla`, `la`, far calls, `li`)
+ * Count chains of `rd` (ie. how many time a register is written to in an
+   instruction window of size 8 by default).
