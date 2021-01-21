@@ -18,4 +18,8 @@ let () =
         raw_instrs in
     let raw_instrs = read_instr_stream [] in
     let instrs = List.fold_left (fun res i -> (Decoder.decode_instr i) :: res) [] raw_instrs in
-    Patterns.find_patterns instrs
+    Patterns.find_patterns instrs;
+    let chains = Chain.iterate_regs instrs in
+    print_endline "Longest chains:";
+    List.iter (fun (reg, c) ->
+        Printf.printf "Register %s: %d\n" (Decoder.register_to_abi reg) c) chains
