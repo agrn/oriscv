@@ -27,7 +27,7 @@ type iinstr =
   | Srli
   | Srai
 
- type sinstr =
+type sinstr =
   | Sb
   | Sh
   | Sw
@@ -174,6 +174,13 @@ let decode_instr r =
   | 0b0110111 | 0b0010111 -> decode_u r
   | 0b1101111 -> decode_j r
   | _ -> Illegal r
+
+let out_register = function
+  | Rtype (_, rd, _, _)
+  | Itype (_, rd, _, _)
+  | Utype (_, rd, _)
+  | Jtype (_, rd, _) -> Some rd
+  | _ -> None
 
 let print_rtype = function
   | Add -> "add"

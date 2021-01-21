@@ -27,7 +27,7 @@ type iinstr =
   | Srli
   | Srai
 
- type sinstr =
+type sinstr =
   | Sb
   | Sh
   | Sw
@@ -57,5 +57,7 @@ type instr =
   | Illegal of int (* opcode *)
 
 val decode_instr : int -> instr
+val out_register : instr -> int option
+
 val register_to_abi : int -> string
 val print_instr : instr -> string
