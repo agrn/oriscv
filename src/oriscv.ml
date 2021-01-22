@@ -23,7 +23,7 @@ let () =
     let instrs = List.fold_left (fun instrs raw ->
         (Decoder.decode_instr raw) :: instrs) [] raw_instrs in
     Patterns.find_patterns instrs;
-    let chains = Chain.iterate_regs (addrs, instrs) in
+    let chains = Chain.iterate_regs (!window_size) (addrs, instrs) in
     print_endline "Longest chains:";
     List.iter (fun (reg, addr, c) ->
         Printf.printf "Register %s: %d (0x%x)\n" (Decoder.register_to_abi reg) c addr) chains

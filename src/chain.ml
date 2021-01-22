@@ -20,12 +20,12 @@ let mkreglobal =
     | n -> aux ((n, 0, 0) :: res) (n - 1) in
   aux [] 31
 
-let iterate_regs (addrs, instrs) =
+let iterate_regs window_size (addrs, instrs) =
   let rec aux reglobal (addrs, instrs) =
     if List.length instrs = 0 then
       reglobal
     else
       let addr = List.hd addrs in
-      let reglobal = count_registers_in_window 8 reglobal addr instrs in
+      let reglobal = count_registers_in_window window_size reglobal addr instrs in
       aux reglobal List.(tl addrs, tl instrs) in
   aux mkreglobal (addrs, List.map Decoder.out_register instrs)
