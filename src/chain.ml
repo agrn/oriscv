@@ -1,35 +1,31 @@
-let count_registers_in_window n reglobal regs =
+let count_registers_in_window n reglobal addr regs =
   let regusage = Array.make 31 0 in
   let rec aux = function
     | 0, _ | _, [] -> ()
     | n, (None | Some 0) :: rem -> aux (n - 1, rem)
-    | n, Some reg :: rem ->
+    | n, (Some reg) :: rem ->
       Array.set regusage (reg - 1) (regusage.(reg - 1) + 1);
       aux (n - 1, rem) in
   aux (n, regs);
   Array.to_list regusage
-  |> List.map2 (fun (reg, c1) c2 -> reg, max c1 c2) reglobal
-  (* List.map (fun (reg, c) ->
-   *     if regusage.(reg - 1)
-   * let _, reg, c = Array.fold_left
-   * let _, reg, c = Array.fold_left (fun (i, reg, r_c) c ->
-   *     if r_c < c then
-   *       (i + 1, i, c)
-   *     else
-   *       (i + 1, reg, r_c)) (1, p_reg, p_c) regusage in
-   * reg, c *)
+  |> List.map2 (fun (reg, addr1, c1) c2 ->
+      if c1 > c2 then
+        reg, addr1, c1
+      else
+        reg, addr, c2) reglobal
 
 let mkreglobal =
   let rec aux res = function
     | 0 -> res
-    | n -> aux ((n, 0) :: res) (n - 1) in
+    | n -> aux ((n, 0, 0) :: res) (n - 1) in
   aux [] 31
 
-let iterate_regs instrs =
-  let rec aux reglobal instrs =
+let iterate_regs (addrs, instrs) =
+  let rec aux reglobal (addrs, instrs) =
     if List.length instrs = 0 then
       reglobal
     else
-      let reglobal = count_registers_in_window 8 reglobal instrs in
-      aux reglobal (List.tl instrs) in
-  aux mkreglobal (List.map Decoder.out_register instrs)
+      let addr = List.hd addrs in
+      let reglobal = count_registers_in_window 8 reglobal addr instrs in
+      aux reglobal List.(tl addrs, tl instrs) in
+  aux mkreglobal (addrs, List.map Decoder.out_register instrs)

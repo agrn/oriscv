@@ -19,11 +19,11 @@ let () =
       with End_of_file ->
         Scanf.Scanning.close_in ic;
         addrs, raw_instrs in
-    let _addrs, raw_instrs = read_instr_stream [] [] in
+    let addrs, raw_instrs = read_instr_stream [] [] in
     let instrs = List.fold_left (fun instrs raw ->
         (Decoder.decode_instr raw) :: instrs) [] raw_instrs in
     Patterns.find_patterns instrs;
-    let chains = Chain.iterate_regs instrs in
+    let chains = Chain.iterate_regs (addrs, instrs) in
     print_endline "Longest chains:";
-    List.iter (fun (reg, c) ->
-        Printf.printf "Register %s: %d\n" (Decoder.register_to_abi reg) c) chains
+    List.iter (fun (reg, addr, c) ->
+        Printf.printf "Register %s: %d (0x%x)\n" (Decoder.register_to_abi reg) c addr) chains
