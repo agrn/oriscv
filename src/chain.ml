@@ -1,4 +1,4 @@
-let count_registers_in_window n reglobal addr regs =
+let initial_window n addr regs =
   let regusage = Array.make 31 0 in
   let rec aux = function
     | 0, _ | _, [] -> ()
@@ -7,25 +7,40 @@ let count_registers_in_window n reglobal addr regs =
       Array.set regusage (reg - 1) (regusage.(reg - 1) + 1);
       aux (n - 1, rem) in
   aux (n, regs);
-  Array.to_list regusage
-  |> List.map2 (fun (reg, addr1, c1) c2 ->
-      if c1 > c2 then
-        reg, addr1, c1
-      else
-        reg, addr, c2) reglobal
+  let reglobal = Array.map (fun c -> addr, c) regusage in
+  regusage, reglobal
 
-let mkreglobal =
-  let rec aux res = function
-    | 0 -> res
-    | n -> aux ((n, 0, 0) :: res) (n - 1) in
-  aux [] 31
+let next_window reglobal regusage addr prevreg nextreg =
+  begin
+    match prevreg with
+    | None | Some 0 -> ()
+    | Some reg ->
+      Array.set regusage (reg - 1) (regusage.(reg - 1) - 1)
+  end;
+  match nextreg with
+  | None | Some 0 -> ()
+  | Some reg ->
+    let c = regusage.(reg - 1) + 1 in
+    Array.set regusage (reg - 1) c;
+    let _, prev = reglobal.(reg - 1) in
+    if prev < c then
+      Array.set reglobal (reg - 1) (addr, c)
+
+let rec remove_first_nth n l =
+  match n, l with
+  | 0, res | _, ([] as res) -> res
+  | n, (_ :: res) -> remove_first_nth (n - 1) res
 
 let iterate_regs window_size (addrs, instrs) =
-  let rec aux reglobal (addrs, instrs) =
-    if List.length instrs = 0 then
-      reglobal
-    else
-      let addr = List.hd addrs in
-      let reglobal = count_registers_in_window window_size reglobal addr instrs in
-      aux reglobal List.(tl addrs, tl instrs) in
-  aux mkreglobal (addrs, List.map Decoder.out_register instrs)
+  let rec aux reglobal regusage addrs instrs nextinstrs =
+    match addrs, instrs, nextinstrs with
+    | addr :: addrs, prevreg :: instrs, nextreg :: nextinstrs ->
+      next_window reglobal regusage addr prevreg nextreg;
+      aux reglobal regusage addrs instrs nextinstrs
+    | _, _, _ ->
+      Array.to_list reglobal
+      |> List.mapi (fun i (addr, c) -> (i + 1, addr, c)) in
+  let instrs = List.map Decoder.out_register instrs in
+  let nextinstrs = remove_first_nth window_size instrs in
+  let regusage, reglobal = initial_window window_size (List.hd addrs) instrs in
+  aux reglobal regusage (List.tl addrs) instrs nextinstrs
