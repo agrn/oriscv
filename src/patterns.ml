@@ -1,6 +1,8 @@
 type stats = {
   branch : int;
   jumps : int;
+  jalr : int;
+  non_ret_jalr : int;
   lla : int;
   la : int;
   far_calls : int;
@@ -12,6 +14,8 @@ type stats = {
 let init_stats = {
   branch = 0;
   jumps = 0;
+  jalr = 0;
+  non_ret_jalr = 0;
   lla = 0;
   la = 0;
   far_calls = 0;
@@ -30,7 +34,14 @@ let count_instr_patterns instrs =
       aux {st with li = st.li + 1} rem
     | Decoder.Btype _ :: rem ->
       aux {st with branch = st.branch + 1} rem
-    | Decoder.Jtype _ :: rem | Decoder.Itype (Jalr, _, _, _) :: rem ->
+    | Decoder.Itype (Jalr, 0, 1, 0) :: rem ->
+      aux {st with jalr = st.jalr + 1;
+                   jumps = st.jumps + 1} rem
+    | Decoder.Itype (Jalr, _, _, _) :: rem ->
+      aux {st with non_ret_jalr = st.non_ret_jalr + 1;
+                   jalr = st.jalr + 1;
+                   jumps = st.jumps + 1} rem
+    | Decoder.Jtype _ :: rem ->
       aux {st with jumps = st.jumps + 1} rem
     | _ :: rem -> aux st rem
     | [] -> st in
@@ -45,6 +56,8 @@ let find_patterns instrs =
   Printf.printf "%d instructions.\n" count;
   print_st st.branch "branches";
   print_st st.jumps "jumps";
+  print_st st.jalr "jalr";
+  print_st st.non_ret_jalr "jalr (non ret)";
   print_st st.lla "lla";
   print_st st.la "la";
   print_st st.far_calls "far calls";
