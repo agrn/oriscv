@@ -1,4 +1,5 @@
 type stats = {
+  alu : int;
   branch : int;
   jumps : int;
   jalr : int;
@@ -14,6 +15,7 @@ type stats = {
 }
 
 let init_stats = {
+  alu = 0;
   branch = 0;
   jumps = 0;
   jalr = 0;
@@ -51,6 +53,8 @@ let count_instr_patterns instrs =
                    jumps = st.jumps + 1} rem
     | Decoder.Jtype _ :: rem ->
       aux {st with jumps = st.jumps + 1} rem
+    | Decoder.Rtype _ :: rem | Decoder.Itype _ :: rem ->
+      aux {st with alu = st.alu + 1} rem
     | _ :: rem -> aux st rem
     | [] -> st in
   aux init_stats instrs
@@ -62,6 +66,7 @@ let find_patterns instrs =
   let print_st sub name =
     Printf.printf "%d %s (%f%%)\n" sub name (percent sub) in
   Printf.printf "%d instructions.\n" count;
+  print_st st.alu "ALU ops";
   print_st st.branch "branches";
   print_st st.jumps "jumps";
   print_st st.jalr "jalr";
