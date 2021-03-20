@@ -54,7 +54,7 @@ type instr =
   | Btype of (binstr * int * int * int) (* opcode, rs1, rs2, imm *)
   | Utype of (uinstr * int * int) (* opcode, rd, imm *)
   | Jtype of (jinstr * int * int) (* opcode, rd, imm *)
-  | Illegal of int (* opcode *)
+  | Illegal of Int32.t (* opcode *)
 
 let sign_extend size n =
   let sign = 1 lsl size in
@@ -64,12 +64,12 @@ let sign_extend size n =
   else
     n
 
-let decode_op r = r land 0x7f
-let decode_rd r = (r land 0xf80) lsr 7
-let decode_rs1 r = (r land 0xf8000) lsr 15
-let decode_rs2 r = (r land 0x1f00000) lsr 20
-let decode_funct3 r = (r land 0x7000) lsr 12
-let decode_funct7 r = (r land 0xfe000000) lsr 25
+let decode_op r = Int32.(logand r 0x7fl)
+let decode_rd r = Int32.(to_int @@ shift_right (logand r 0xf80l) 7)
+let decode_rs1 r = Int32.(to_int @@ shift_right (logand r 0xf8000l) 15)
+let decode_rs2 r = Int32.(to_int @@ shift_right (logand r 0x1f00000l) 20)
+let decode_funct3 r = Int32.(shift_right (logand r 0x7000l) 12)
+let decode_funct7 r = Int32.(shift_right (logand r 0xfe000000l) 25)
 
 let decode_r r =
   let op = decode_op r and
@@ -79,16 +79,16 @@ let decode_r r =
       funct3 = decode_funct3 r and
       funct7 = decode_funct7 r in
   match op, funct3, funct7 with
-  | 0b0110011, 0b000, 0 -> Rtype (Add, rd, rs1, rs2)
-  | 0b0110011, 0b001, 0 -> Rtype (Sll, rd, rs1, rs2)
-  | 0b0110011, 0b010, 0 -> Rtype (Slt, rd, rs1, rs2)
-  | 0b0110011, 0b011, 0 -> Rtype (Sltu, rd, rs1, rs2)
-  | 0b0110011, 0b100, 0 -> Rtype (Xor, rd, rs1, rs2)
-  | 0b0110011, 0b101, 0 -> Rtype (Srl, rd, rs1, rs2)
-  | 0b0110011, 0b110, 0 -> Rtype (Or, rd, rs1, rs2)
-  | 0b0110011, 0b111, 0 -> Rtype (And, rd, rs1, rs2)
-  | 0b0110011, 0b000, 0b0100000 -> Rtype (Sub, rd, rs1, rs2)
-  | 0b0110011, 0b101, 0b0100000 -> Rtype (Sra, rd, rs1, rs2)
+  | 0b0110011l, 0b000l, 0l -> Rtype (Add, rd, rs1, rs2)
+  | 0b0110011l, 0b001l, 0l -> Rtype (Sll, rd, rs1, rs2)
+  | 0b0110011l, 0b010l, 0l -> Rtype (Slt, rd, rs1, rs2)
+  | 0b0110011l, 0b011l, 0l -> Rtype (Sltu, rd, rs1, rs2)
+  | 0b0110011l, 0b100l, 0l -> Rtype (Xor, rd, rs1, rs2)
+  | 0b0110011l, 0b101l, 0l -> Rtype (Srl, rd, rs1, rs2)
+  | 0b0110011l, 0b110l, 0l -> Rtype (Or, rd, rs1, rs2)
+  | 0b0110011l, 0b111l, 0l -> Rtype (And, rd, rs1, rs2)
+  | 0b0110011l, 0b000l, 0b0100000l -> Rtype (Sub, rd, rs1, rs2)
+  | 0b0110011l, 0b101l, 0b0100000l -> Rtype (Sra, rd, rs1, rs2)
   | _ -> Illegal r
 
 let decode_i r =
@@ -98,23 +98,24 @@ let decode_i r =
       shamt = decode_rs2 r and
       funct3 = decode_funct3 r and
       funct7 = decode_funct7 r in
-  let immediate = sign_extend 11 ((r land 0xfff00000) lsr 20) in
+  let immediate = Int32.(to_int @@ shift_right (logand r 0xfff00000l) 20)
+                |> sign_extend 11 in
   match op, funct3, funct7 with
-  | 0b1100111, 0, _ -> Itype (Jalr, rd, rs1, immediate)
-  | 0b0000011, 0b000, _ -> Itype (Lb, rd, rs1, immediate)
-  | 0b0000011, 0b001, _ -> Itype (Lh, rd, rs1, immediate)
-  | 0b0000011, 0b010, _ -> Itype (Lw, rd, rs1, immediate)
-  | 0b0000011, 0b100, _ -> Itype (Lbu, rd, rs1, immediate)
-  | 0b0000011, 0b101, _ -> Itype (Lhu, rd, rs1, immediate)
-  | 0b0010011, 0b000, _ -> Itype (Addi, rd, rs1, immediate)
-  | 0b0010011, 0b010, _ -> Itype (Slti, rd, rs1, immediate)
-  | 0b0010011, 0b011, _ -> Itype (Sltiu, rd, rs1, immediate)
-  | 0b0010011, 0b100, _ -> Itype (Xori, rd, rs1, immediate)
-  | 0b0010011, 0b110, _ -> Itype (Ori, rd, rs1, immediate)
-  | 0b0010011, 0b111, _ -> Itype (Andi, rd, rs1, immediate)
-  | 0b0010011, 0b001, 0 -> Itype (Slli, rd, rs1, shamt)
-  | 0b0010011, 0b101, 0 -> Itype (Srli, rd, rs1, shamt)
-  | 0b0010011, 0b101, 0b0100000 -> Itype (Srai, rd, rs1, shamt)
+  | 0b1100111l, 0l, _ -> Itype (Jalr, rd, rs1, immediate)
+  | 0b0000011l, 0b000l, _ -> Itype (Lb, rd, rs1, immediate)
+  | 0b0000011l, 0b001l, _ -> Itype (Lh, rd, rs1, immediate)
+  | 0b0000011l, 0b010l, _ -> Itype (Lw, rd, rs1, immediate)
+  | 0b0000011l, 0b100l, _ -> Itype (Lbu, rd, rs1, immediate)
+  | 0b0000011l, 0b101l, _ -> Itype (Lhu, rd, rs1, immediate)
+  | 0b0010011l, 0b000l, _ -> Itype (Addi, rd, rs1, immediate)
+  | 0b0010011l, 0b010l, _ -> Itype (Slti, rd, rs1, immediate)
+  | 0b0010011l, 0b011l, _ -> Itype (Sltiu, rd, rs1, immediate)
+  | 0b0010011l, 0b100l, _ -> Itype (Xori, rd, rs1, immediate)
+  | 0b0010011l, 0b110l, _ -> Itype (Ori, rd, rs1, immediate)
+  | 0b0010011l, 0b111l, _ -> Itype (Andi, rd, rs1, immediate)
+  | 0b0010011l, 0b001l, 0l -> Itype (Slli, rd, rs1, shamt)
+  | 0b0010011l, 0b101l, 0l -> Itype (Srli, rd, rs1, shamt)
+  | 0b0010011l, 0b101l, 0b0100000l -> Itype (Srai, rd, rs1, shamt)
   | _ -> Illegal r
 
 let decode_s r =
@@ -122,57 +123,63 @@ let decode_s r =
       rs2 = decode_rs2 r and
       funct3 = decode_funct3 r and
       lower_imm = decode_rd r in
-  let immediate = lower_imm lor ((r land 0xfe000000) lsr 20)
+  let immediate = Int32.(to_int @@ shift_right (logand r 0xfe000000l) 20)
+                  |> (lor) lower_imm
                   |> sign_extend 11 in
   match funct3 with
-  | 0b000 -> Stype (Sb, rs2, rs1, immediate)
-  | 0b001 -> Stype (Sh, rs2, rs1, immediate)
-  | 0b010 -> Stype (Sw, rs2, rs1, immediate)
+  | 0b000l -> Stype (Sb, rs2, rs1, immediate)
+  | 0b001l -> Stype (Sh, rs2, rs1, immediate)
+  | 0b010l -> Stype (Sw, rs2, rs1, immediate)
   | _ -> Illegal r
 
 let decode_b r =
   let rs1 = decode_rs1 r and
       rs2 = decode_rs2 r and
       funct3 = decode_funct3 r and
-      immediate = ((r land 0x80000000) lsr 19) lor ((r land 0x80) lsl 4)
-                  lor ((r land 0x7e000000) lsr 20) lor ((r land 0xf00) lsr 7)
+      immediate = Int32.(to_int
+                           (shift_right (logand r 0x80000000l) 19
+                            |> logor (shift_right (logand r 0x80l) 4)
+                            |> logor (shift_right (logand r 0x7e000000l) 20)
+                            |> logor (shift_right (logand r 0xf00l) 7)))
                   |> sign_extend 12 in
   match funct3 with
-  | 0b000 -> Btype (Beq, rs1, rs2, immediate)
-  | 0b001 -> Btype (Bne, rs1, rs2, immediate)
-  | 0b100 -> Btype (Blt, rs1, rs2, immediate)
-  | 0b101 -> Btype (Bge, rs1, rs2, immediate)
-  | 0b110 -> Btype (Bltu, rs1, rs2, immediate)
-  | 0b111 -> Btype (Bgeu, rs1, rs2, immediate)
+  | 0b000l -> Btype (Beq, rs1, rs2, immediate)
+  | 0b001l -> Btype (Bne, rs1, rs2, immediate)
+  | 0b100l -> Btype (Blt, rs1, rs2, immediate)
+  | 0b101l -> Btype (Bge, rs1, rs2, immediate)
+  | 0b110l -> Btype (Bltu, rs1, rs2, immediate)
+  | 0b111l -> Btype (Bgeu, rs1, rs2, immediate)
   | _ -> Illegal r
 
 let decode_u r =
   let op = decode_op r and
       rd = decode_rd r and
-      immediate = (r land 0xffffff00) lsr 12 in
+      immediate = Int32.(to_int @@ shift_right (logand r 0xffffff00l) 12) in
   match op with
-  | 0b0110111 -> Utype (Lui, rd, immediate)
-  | 0b0010111 -> Utype (Auipc, rd, immediate)
+  | 0b0110111l -> Utype (Lui, rd, immediate)
+  | 0b0010111l -> Utype (Auipc, rd, immediate)
   | _ -> Illegal r
 
 let decode_j r =
   let op = decode_op r and
       rd = decode_rd r in
-  let immediate = (r land 0xff000) lor ((r land 0x100000) lsr 9)
-                  lor ((r land 0x7fe00000) lsr 20)
-                  lor ((r land 0x80000000) lsr 11)
+  let immediate = Int32.(to_int
+                           (logand r 0xff000l
+                            |> logor (shift_right (logand r 0x100000l) 9)
+                            |> logor (shift_right (logand r 0x7fe00000l) 20)
+                            |> logor (shift_right (logand r 0x80000000l) 11)))
                   |> sign_extend 20 in
-  if op = 0b1101111 then Jtype (Jal, rd, immediate)
+  if op = 0b1101111l then Jtype (Jal, rd, immediate)
   else Illegal r
 
 let decode_instr r =
   match decode_op r with
-  | 0b0110011 -> decode_r r
-  | 0b1100111 | 0b0000011 | 0b0010011 -> decode_i r
-  | 0b0100011 -> decode_s r
-  | 0b1100011 -> decode_b r
-  | 0b0110111 | 0b0010111 -> decode_u r
-  | 0b1101111 -> decode_j r
+  | 0b0110011l -> decode_r r
+  | 0b1100111l | 0b0000011l | 0b0010011l -> decode_i r
+  | 0b0100011l -> decode_s r
+  | 0b1100011l -> decode_b r
+  | 0b0110111l | 0b0010111l -> decode_u r
+  | 0b1101111l -> decode_j r
   | _ -> Illegal r
 
 let out_register = function
@@ -288,4 +295,4 @@ let print_instr = function
     Printf.sprintf "%s %a, 0x%X" (print_utype opcode) fmt_register rd imm
   | Jtype (opcode, rd, imm) ->
     Printf.sprintf "%s %a, 0x%X" (print_jtype opcode) fmt_register rd imm
-  | Illegal instr -> Printf.sprintf "illegal instruction (0x%X)" instr
+  | Illegal instr -> Printf.sprintf "illegal instruction (0x%lX)" instr

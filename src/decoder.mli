@@ -54,9 +54,9 @@ type instr =
   | Btype of (binstr * int * int * int) (* opcode, rs1, rs2, imm *)
   | Utype of (uinstr * int * int) (* opcode, rd, imm *)
   | Jtype of (jinstr * int * int) (* opcode, rd, imm *)
-  | Illegal of int (* opcode *)
+  | Illegal of Int32.t (* opcode *)
 
-val decode_instr : int -> instr
+val decode_instr : Int32.t -> instr
 val out_register : instr -> int option
 
 val register_to_abi : int -> string

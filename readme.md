@@ -26,10 +26,6 @@ $ riscv32-unknown-elf-objdump -d <exe> | awk '/^[0-9a-f]+:/ {print $1, $2}' >out
 
 ## Warning
 
-As `oriscv` stores read bytes in native OCaml integers (as they can store
-`n - 1` bits of information), it does not work on 32-bits machines.  To work on
-those, the program could be changed to use `Int32` instead.
-
 `oriscv` only supports a subset of RV32I for now (all of them except fences and
 CPSR-related instructions).  Unrecognised instructions won't crash it (they will
 show up as illegal instructions once decoded).

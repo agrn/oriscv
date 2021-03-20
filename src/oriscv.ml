@@ -16,7 +16,7 @@ let () =
     let ic = Scanf.Scanning.open_in filename in
     let rec read_instr_stream addrs raw_instrs =
       try
-        let addr, num = Scanf.bscanf ic "%x: %x\n" (fun addr num -> addr, num) in
+        let addr, num = Scanf.bscanf ic "%x: %lx\n" (fun addr num -> addr, num) in
         read_instr_stream (addr :: addrs) (num :: raw_instrs)
       with End_of_file ->
         Scanf.Scanning.close_in ic;
@@ -31,7 +31,7 @@ let () =
     List.iter (fun (reg, addr, c) ->
         Printf.printf "Register %s: %d (0x%x)\n" (Decoder.register_to_abi reg) c addr) chains
   | true, Some instr ->
-    let instr = int_of_string ("0x" ^ instr) in
+    let instr = Int32.of_string ("0x" ^ instr) in
     Decoder.decode_instr instr
     |> Decoder.print_instr
     |> print_endline
