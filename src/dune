@@ -1,3 +1,6 @@
 (executable
- (name oriscv)
- (modules Chain Decoder Oriscv Patterns))
+ (name oriscvjs)
+ (libraries js_of_ocaml)
+ (modules Decoder Oriscvjs)
+ (modes js)
+ (preprocess (pps js_of_ocaml-ppx)))

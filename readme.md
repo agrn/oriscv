@@ -3,10 +3,16 @@
 A RISC-V 32 instruction decoder/statistics generator written in OCaml.  It can
 be compiled with OCaml 4.05.0 (the version distributed in Debian).
 
+This also contains a web version of the decoder.  Only `decoder.ml` is transpiled
+in JS with `js_of_ocaml`.
+
 ## Dependencies
 
 Only the stdlib and Dune for building.  A `Makefile` could be made to do the
 same thing as this software is so simple.
+
+For the web version, `js_of_ocaml-compiler` is required.  Build it in release
+mode or the resulting file will be humongous.
 
 ## Usage
 
