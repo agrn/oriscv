@@ -38,7 +38,7 @@ show up as illegal instructions once decoded).
 
  * Number of instructions
  * Proportion of branches
- * Proportions of jumps
- * Proportions of various pseudo-instructions (`lla`, `la`, far calls, `li`)
+ * Proportion of jumps
+ * Proportion of various pseudo-instructions (`lla`, `la`, far calls, `li`)
  * Count chains of `rd` (ie. how many time a register is written to in an
    instruction window of size 8 by default).
