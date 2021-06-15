@@ -35,7 +35,11 @@ let () =
     List.iter (fun (reg, addr, c) ->
         Printf.printf "Register %s: %d (0x%x)\n" (Decoder.register_to_abi reg) c addr) chains
   | true, Some instr ->
-    let instr = int_of_string ("0x" ^ instr) in
-    Decoder.decode_instr instr
-    |> Decoder.print_instr
-    |> print_endline
+    match int_of_string_opt ("0x" ^ instr) with
+    | Some instr ->
+      Decoder.decode_instr instr
+      |> Decoder.print_instr
+      |> print_endline
+    | None ->
+      Printf.eprintf "Invalid hex value: '%s'\n" instr;
+      exit 1
