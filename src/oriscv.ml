@@ -49,4 +49,4 @@ let () =
     Arg.usage params usage;
     exit 1
   | false, Some filename -> find_patterns filename
-  | true, Some instr -> decode_single_instr instr
+  | true, Some instr -> decode_single_instr (String.trim instr)
