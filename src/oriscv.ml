@@ -15,6 +15,11 @@ let read_instr_stream filename line_parser =
       data in
   read_instr_stream
 
+let decode_and_print instr =
+  Decoder.decode_instr instr
+  |> Decoder.print_instr
+  |> print_endline
+
 let () =
   let rem = ref None in
   Arg.parse params (fun f -> rem := Some f) usage;
@@ -36,10 +41,7 @@ let () =
         Printf.printf "Register %s: %d (0x%x)\n" (Decoder.register_to_abi reg) c addr) chains
   | true, Some instr ->
     match int_of_string_opt ("0x" ^ instr) with
-    | Some instr ->
-      Decoder.decode_instr instr
-      |> Decoder.print_instr
-      |> print_endline
+    | Some instr -> decode_and_print instr
     | None ->
       Printf.eprintf "Invalid hex value: '%s'\n" instr;
       exit 1
