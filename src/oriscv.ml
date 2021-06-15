@@ -20,6 +20,27 @@ let decode_and_print instr =
   |> Decoder.print_instr
   |> print_endline
 
+let find_patterns filename =
+  let addr_and_instr_parser ic (addrs, instrs) =
+    Scanf.bscanf ic "%x: %x\n" (fun addr instr -> addr :: addrs, instr :: instrs) in
+  let addrs, instrs = read_instr_stream filename addr_and_instr_parser ([], []) in
+  let addrs = List.rev addrs in
+  let instrs = List.fold_left
+      (fun instrs raw ->
+         (Decoder.decode_instr raw) :: instrs) [] instrs in
+  Patterns.find_patterns instrs;
+  let chains = Chain.iterate_regs (!window_size) (addrs, instrs) in
+  print_endline "Longest chains:";
+  List.iter (fun (reg, addr, c) ->
+      Printf.printf "Register %s: %d (0x%x)\n" (Decoder.register_to_abi reg) c addr) chains
+
+let decode_single_instr instr =
+  match int_of_string_opt ("0x" ^ instr) with
+  | Some instr -> decode_and_print instr
+  | None ->
+    Printf.eprintf "Invalid hex value: '%s'\n" instr;
+    exit 1
+
 let () =
   let rem = ref None in
   Arg.parse params (fun f -> rem := Some f) usage;
@@ -27,21 +48,5 @@ let () =
   | _, None ->
     Arg.usage params usage;
     exit 1
-  | false, Some filename ->
-    let addr_and_instr_parser ic (addrs, instrs) =
-      Scanf.bscanf ic "%x: %x\n" (fun addr instr -> addr :: addrs, instr :: instrs) in
-    let addrs, instrs = read_instr_stream filename addr_and_instr_parser ([], []) in
-    let addrs = List.rev addrs in
-    let instrs = List.fold_left (fun instrs raw ->
-        (Decoder.decode_instr raw) :: instrs) [] instrs in
-    Patterns.find_patterns instrs;
-    let chains = Chain.iterate_regs (!window_size) (addrs, instrs) in
-    print_endline "Longest chains:";
-    List.iter (fun (reg, addr, c) ->
-        Printf.printf "Register %s: %d (0x%x)\n" (Decoder.register_to_abi reg) c addr) chains
-  | true, Some instr ->
-    match int_of_string_opt ("0x" ^ instr) with
-    | Some instr -> decode_and_print instr
-    | None ->
-      Printf.eprintf "Invalid hex value: '%s'\n" instr;
-      exit 1
+  | false, Some filename -> find_patterns filename
+  | true, Some instr -> decode_single_instr instr
