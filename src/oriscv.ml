@@ -1,8 +1,10 @@
 let window_size = ref 8
 let decode_instr = ref false
+let decode_file = ref false
 
 let params = [("-w", Arg.Set_int window_size, "Sets the window size");
-              ("-d", Arg.Set decode_instr, "Decode a single instruction")]
+              ("-d", Arg.Set decode_instr, "Decode a single instruction");
+              ("-f", Arg.Set decode_file, "Decode a hex dump")]
 let usage = "oriscv is a simple RV32I instruction statistics generator"
 
 let read_instr_stream filename line_parser =
@@ -41,12 +43,19 @@ let decode_single_instr instr =
     Printf.eprintf "Invalid hex value: '%s'\n" instr;
     exit 1
 
+let decode_entire_file filename =
+  let instr_parser ic () =
+    Scanf.bscanf ic "%x\n" (fun instr -> instr)
+    |> decode_and_print in
+  read_instr_stream filename instr_parser ()
+
 let () =
   let rem = ref None in
   Arg.parse params (fun f -> rem := Some f) usage;
-  match !decode_instr, !rem with
-  | _, None ->
+  match !decode_instr, !decode_file, !rem with
+  | _, _, None ->
     Arg.usage params usage;
     exit 1
-  | false, Some filename -> find_patterns filename
-  | true, Some instr -> decode_single_instr (String.trim instr)
+  | false, false, Some filename -> find_patterns filename
+  | true, false, Some instr -> decode_single_instr (String.trim instr)
+  | _, true, Some filename -> decode_entire_file filename
