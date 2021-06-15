@@ -5,6 +5,16 @@ let params = [("-w", Arg.Set_int window_size, "Sets the window size");
               ("-d", Arg.Set decode_instr, "Decode a single instruction")]
 let usage = "oriscv is a simple RV32I instruction statistics generator"
 
+let read_instr_stream filename line_parser =
+  let ic = Scanf.Scanning.open_in filename in
+  let rec read_instr_stream data =
+    try
+      read_instr_stream (line_parser ic data)
+    with End_of_file ->
+      Scanf.Scanning.close_in ic;
+      data in
+  read_instr_stream
+
 let () =
   let rem = ref None in
   Arg.parse params (fun f -> rem := Some f) usage;
@@ -13,18 +23,12 @@ let () =
     Arg.usage params usage;
     exit 1
   | false, Some filename ->
-    let ic = Scanf.Scanning.open_in filename in
-    let rec read_instr_stream addrs raw_instrs =
-      try
-        let addr, num = Scanf.bscanf ic "%x: %x\n" (fun addr num -> addr, num) in
-        read_instr_stream (addr :: addrs) (num :: raw_instrs)
-      with End_of_file ->
-        Scanf.Scanning.close_in ic;
-        addrs, raw_instrs in
-    let addrs, raw_instrs = read_instr_stream [] [] in
+    let addr_and_instr_parser ic (addrs, instrs) =
+      Scanf.bscanf ic "%x: %x\n" (fun addr instr -> addr :: addrs, instr :: instrs) in
+    let addrs, instrs = read_instr_stream filename addr_and_instr_parser ([], []) in
     let addrs = List.rev addrs in
     let instrs = List.fold_left (fun instrs raw ->
-        (Decoder.decode_instr raw) :: instrs) [] raw_instrs in
+        (Decoder.decode_instr raw) :: instrs) [] instrs in
     Patterns.find_patterns instrs;
     let chains = Chain.iterate_regs (!window_size) (addrs, instrs) in
     print_endline "Longest chains:";
