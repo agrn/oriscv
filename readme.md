@@ -42,3 +42,8 @@ show up as illegal instructions once decoded).
  * Proportion of various pseudo-instructions (`lla`, `la`, far calls, `li`)
  * Count chains of `rd` (ie. how many time a register is written to in an
    instruction window of size 8 by default).
+
+## License
+This project is licensed under the Mozilla Public License, v2.0.  A copy of the
+license can be found in the LICENSE file, or at
+https://www.mozilla.org/en-US/MPL/2.0/.
